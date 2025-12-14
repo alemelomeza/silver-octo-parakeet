@@ -151,7 +151,7 @@ cd taskmanager
 ### **2. Ejecutar**
 
 ```
-go run cmd/api/main.go
+JWT_SECRET=super-secret-key JWT_EXPHOURS=24 ADMIN_USERNAME=admin ADMIN_PASSWORD=admin123 go run cmd/api/main.go
 ```
 
 ### **3. Usuario base creado automáticamente**

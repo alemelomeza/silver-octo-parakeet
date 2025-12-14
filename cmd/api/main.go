@@ -11,11 +11,24 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 )
 
 func main() {
-    jwtSecret := "super-secret-key"
-    jwtExpHours := 24
+    jwtSecret := os.Getenv("JWT_SECRET")
+    if jwtSecret == "" {
+        log.Fatal("JWT_SECRET environment variable is required")
+    }
+    jwtExpHoursStr := os.Getenv("JWT_EXP_HOURS")
+    if jwtExpHoursStr == "" {
+        jwtExpHoursStr = "24" // default to 24 hours
+    }
+    var jwtExpHours int
+    jwtExpHours, err := strconv.Atoi(jwtExpHoursStr)
+    if err != nil {
+        log.Fatalf("Invalid JWT_EXP_HOURS value: %v", err)
+    }
 
     userRepo := mem.NewUserRepositoryMemory()
     taskRepo := mem.NewTaskRepositoryMemory()
@@ -74,11 +87,11 @@ func main() {
 func createDefaultAdmin(repo *mem.UserRepositoryMemory, authSvc auth.Service) {
     admin := &user.User{
         ID:            "admin-1",
-        Username:      "admin",
+        Username:      os.Getenv("ADMIN_USERNAME"),
         Role:          user.RoleAdmin,
-        PasswordHash:  authSvc.HashPassword("admin123"),
+        PasswordHash:  authSvc.HashPassword(os.Getenv("ADMIN_PASSWORD")),
         MustChangePwd: false,
     }
     repo.Create(context.Background(), admin)
-    fmt.Println("Default admin user created (username: admin, pass: admin123)")
+    fmt.Printf("Default admin user created (username: %s)\n", admin.Username)
 }
